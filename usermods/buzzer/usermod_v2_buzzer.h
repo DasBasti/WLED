@@ -7,7 +7,7 @@
 
 #define USERMOD_ID_BUZZER 900
 #ifndef USERMOD_BUZZER_PIN
-#define USERMOD_BUZZER_PIN GPIO_NUM_32
+#define USERMOD_BUZZER_PIN GPIO_NUM_4
 #endif
 
 /*
@@ -32,7 +32,11 @@ class BuzzerUsermod : public Usermod {
     void setup() {
       // Setup the pin, and default to LOW
       pinMode(USERMOD_BUZZER_PIN, OUTPUT);
-      digitalWrite(USERMOD_BUZZER_PIN, LOW);
+      //digitalWrite(USERMOD_BUZZER_PIN, LOW);
+      
+      ledcSetup(1, 4000, 8);
+
+      ledcAttachPin(USERMOD_BUZZER_PIN, 1);
 
       // Beep on startup
       sequence_.push_back({ HIGH, 50 });
@@ -49,7 +53,6 @@ class BuzzerUsermod : public Usermod {
       sequence_.push_back({ LOW, 100 });
       sequence_.push_back({ HIGH, 50 });
       sequence_.push_back({ LOW, 30 });
-      sequence_.push_back({ HIGH, 50 });
       sequence_.push_back({ LOW, 0 });
     }
 
@@ -63,7 +66,11 @@ class BuzzerUsermod : public Usermod {
       auto event = sequence_.front();
       sequence_.pop_front();
 
-      digitalWrite(USERMOD_BUZZER_PIN, event.first);
+      if(event.first == HIGH){
+        ledcWrite(1, 128);
+      } else {
+        ledcWrite(1, 0);
+      }
       delay_ = event.second;
 
       lastTime_ = millis();

@@ -27,9 +27,9 @@
 #include "../usermods/PWM_fan/usermod_PWM_fan.h"
 #endif
 
-#ifdef USERMOD_BUZZER
+//#ifdef USERMOD_BUZZER
 #include "../usermods/buzzer/usermod_v2_buzzer.h"
-#endif
+//#endif
 #ifdef USERMOD_SENSORSTOMQTT
 #include "../usermods/sensors_to_mqtt/usermod_v2_SensorsToMqtt.h"
 #endif
@@ -128,9 +128,9 @@ void registerUsermods()
   usermods.add(new PWMFanUsermod());
   #endif
 
-  #ifdef USERMOD_BUZZER
+  //#ifdef USERMOD_BUZZER
   usermods.add(new BuzzerUsermod());
-  #endif
+  //#endif
 
   #ifdef USERMOD_BME280
   usermods.add(new UsermodBME280());
