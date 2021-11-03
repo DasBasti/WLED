@@ -100,6 +100,9 @@
 #include "../usermods/seven_segment_display/usermod_v2_seven_segment_display.h"
 #endif
 
+#include "../usermods/websocket/usermod_websocket.h"
+
+
 void registerUsermods()
 {
 /*
@@ -187,4 +190,6 @@ void registerUsermods()
   #ifdef USERMOD_SEVEN_SEGMENT
   usermods.add(new SevenSegmentDisplay());
   #endif
+
+  usermods.add(new WebsocketUsermod());
 }
