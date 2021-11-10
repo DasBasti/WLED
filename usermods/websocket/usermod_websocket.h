@@ -27,6 +27,7 @@ class WebsocketUsermod : public Usermod {
     u8_t lastId=0;
     u8_t numbers[255];
     u8_t numbers_counter=0;
+    BuzzerUsermod *buzzer;
 public:
     //Functions called by WLED
 
@@ -46,6 +47,7 @@ public:
         }
         in_buffer = &frames[1];
         out_buffer = &frames[0];
+        buzzer = static_cast<BuzzerUsermod*>(usermods.lookup(USERMOD_ID_BUZZER));
     }
 
 
