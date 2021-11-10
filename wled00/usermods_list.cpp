@@ -45,6 +45,10 @@
 #include "../usermods/DHT/usermod_dht.h"
 #endif
 
+#ifdef USERMOD_MQTTSTREAM
+#include "../usermods/mqtt_stream/mqtt_stream.h"
+#endif
+
 void registerUsermods()
 {
 /*
@@ -87,4 +91,9 @@ void registerUsermods()
 #ifdef USERMOD_DHT
 usermods.add(new UsermodDHT());
 #endif
+
+#ifdef USERMOD_MQTTSTREAM
+usermods.add(new UsermodMqttStream());
+#endif
+
 }
