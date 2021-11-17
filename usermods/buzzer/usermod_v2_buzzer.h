@@ -50,9 +50,9 @@ class BuzzerUsermod : public Usermod {
      */
     void connected() {
       // Double beep on WiFi
-      sequence_.push_back({ LOW, 100 });
-      sequence_.push_back({ HIGH, 50 });
-      sequence_.push_back({ LOW, 30 });
+      sequence_.push_back({ HIGH, 100 });
+      sequence_.push_back({ LOW, 50 });
+      sequence_.push_back({ HIGH, 30 });
       sequence_.push_back({ LOW, 0 });
     }
 
