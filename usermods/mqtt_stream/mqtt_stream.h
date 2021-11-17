@@ -9,10 +9,12 @@ class UsermodMqttStream: public Usermod
 {
 private:
     bool mqttInitialized;
+    bool mqttSubscribed;
 
 public:
     UsermodMqttStream() :
-            mqttInitialized(false)
+            mqttInitialized(false),
+            mqttSubscribed(false)
     {
     }
 
@@ -21,26 +23,36 @@ public:
         
     } 
 
+    void connected()
+    {
+      mqttSubscribed = false;
+    }
+
     void loop()
     {
-        if (!mqttInitialized) {
-            mqttInit();
+        if (!mqttInitialized) 
+        {
+          if (!mqtt)
+              return;
+          if (!mqtt->connected())
+              return;  
+          mqtt->onMessage(
+              std::bind(&UsermodMqttStream::onMqttMessage, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
+              std::placeholders::_5, std::placeholders::_6));
+          mqttInitialized = true;
+        }
+        if (!mqttSubscribed)
+        {
+            mqttSubscribe();
             return; // Try again in next loop iteration
         }
     }
 
-    void mqttInit()
+    void mqttSubscribe()
     {
         char subuf[38];
-        if (!mqtt)
-            return;
-        if (!mqtt->connected())
-            return;
-        mqtt->onMessage(
-                std::bind(&UsermodMqttStream::onMqttMessage, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
-                          std::placeholders::_5, std::placeholders::_6));
         
-       uint16_t ret=0;
+        uint16_t ret=0;
         if (mqttDeviceTopic[0] != 0) {
             strcpy(subuf, mqttDeviceTopic);
             strcat_P(subuf, PSTR("/stream"));
