@@ -365,12 +365,20 @@ void WLED::setup()
   escapedMac.toLowerCase();
   if (strcmp(cmDNS, "x") == 0)        // fill in unique mdns default
   {
+    #ifdef WLED_MDNS_PREF
+    strcpy_P(cmDNS, PSTR(WLED_MDNS_PREF));
+    #else 
     strcpy_P(cmDNS, PSTR("wled-"));
-    sprintf(cmDNS + 5, "%*s", 6, escapedMac.c_str() + 6);
+    #endif
+    sprintf(cmDNS + strlen(cmDNS), "%*s", 6, escapedMac.c_str() + 6);
   }
   if (mqttDeviceTopic[0] == 0) {
+    #ifdef MQTT_DEVICETOPIC
+    strcpy_P(mqttDeviceTopic, PSTR(MQTT_DEVICETOPIC));
+    #else
     strcpy_P(mqttDeviceTopic, PSTR("wled/"));
-    sprintf(mqttDeviceTopic + 5, "%*s", 6, escapedMac.c_str() + 6);
+    #endif
+    sprintf(mqttDeviceTopic + strlen(mqttDeviceTopic), "%*s", 6, escapedMac.c_str() + 6);
   }
   if (mqttClientID[0] == 0) {
     strcpy_P(mqttClientID, PSTR("WLED-"));

@@ -262,19 +262,25 @@ WLED_GLOBAL bool noWifiSleep _INIT(false);
 #endif
 
 // LED CONFIG
-WLED_GLOBAL uint16_t ledCount _INIT(DEFAULT_LED_COUNT);   // overcurrent prevented by ABL
-WLED_GLOBAL bool turnOnAtBoot _INIT(true);                // turn on LEDs at power-up
-WLED_GLOBAL byte bootPreset   _INIT(0);                   // save preset to load after power-up
-
 //if true, a segment per bus will be created on boot and LED settings save
 //if false, only one segment spanning the total LEDs is created,
 //but not on LED settings save if there is more than one segment currently
 WLED_GLOBAL bool autoSegments _INIT(false);
+#ifdef WLED_LEDCOUNT
+WLED_GLOBAL uint16_t ledCount _INIT(WLED_LEDCOUNT);          // overcurrent prevented by ABL
+#else
+WLED_GLOBAL uint16_t ledCount _INIT(DEFAULT_LED_COUNT);          // overcurrent prevented by ABL
+#endif
+WLED_GLOBAL bool turnOnAtBoot _INIT(true);        // turn on LEDs at power-up
+WLED_GLOBAL byte bootPreset   _INIT(0);           // save preset to load after power-up
 
 WLED_GLOBAL byte col[]    _INIT_N(({ 255, 160, 0, 0 }));  // current RGB(W) primary color. col[] should be updated if you want to change the color.
 WLED_GLOBAL byte colSec[] _INIT_N(({ 0, 0, 0, 0 }));      // current RGB(W) secondary color
+#ifdef WLED_BRIGHTNESS
+WLED_GLOBAL byte briS     _INIT(WLED_BRIGHTNESS);                     // default brightness
+#else
 WLED_GLOBAL byte briS     _INIT(128);                     // default brightness
-
+#endif
 WLED_GLOBAL byte nightlightTargetBri _INIT(0);      // brightness after nightlight is over
 WLED_GLOBAL byte nightlightDelayMins _INIT(60);
 WLED_GLOBAL byte nightlightMode      _INIT(NL_MODE_FADE); // See const.h for available modes. Was nightlightFade
@@ -330,23 +336,58 @@ WLED_GLOBAL bool arlsForceMaxBri _INIT(false);                    // enable to f
 WLED_GLOBAL DMXESPSerial dmx;
 WLED_GLOBAL uint16_t e131ProxyUniverse _INIT(0);                  // output this E1.31 (sACN) / ArtNet universe via MAX485 (0 = disabled)
 #endif
+#ifdef WLED_ENABLE_ARTNET
+WLED_GLOBAL uint16_t e131Universe _INIT(0);                       // settings for E1.31 (sACN) protocol (only DMX_MODE_MULTIPLE_* can span over consequtive universes)
+WLED_GLOBAL uint16_t e131Port _INIT(6454);                        // DMX in port. E1.31 default is 5568, Art-Net is 6454
+WLED_GLOBAL byte DMXMode _INIT(DMX_MODE_MULTIPLE_RGB);            // DMX mode (s.a.)
+WLED_GLOBAL uint16_t DMXAddress _INIT(0);                         // DMX start address of fixture, a.k.a. first Channel [for E1.31 (sACN) protocol]
+#else
 WLED_GLOBAL uint16_t e131Universe _INIT(1);                       // settings for E1.31 (sACN) protocol (only DMX_MODE_MULTIPLE_* can span over consequtive universes)
 WLED_GLOBAL uint16_t e131Port _INIT(5568);                        // DMX in port. E1.31 default is 5568, Art-Net is 6454
 WLED_GLOBAL byte DMXMode _INIT(DMX_MODE_MULTIPLE_RGB);            // DMX mode (s.a.)
 WLED_GLOBAL uint16_t DMXAddress _INIT(1);                         // DMX start address of fixture, a.k.a. first Channel [for E1.31 (sACN) protocol]
+#endif
 WLED_GLOBAL byte DMXOldDimmer _INIT(0);                           // only update brightness on change
 WLED_GLOBAL byte e131LastSequenceNumber[E131_MAX_UNIVERSE_COUNT]; // to detect packet loss
 WLED_GLOBAL bool e131Multicast _INIT(false);                      // multicast or unicast
 WLED_GLOBAL bool e131SkipOutOfSequence _INIT(false);              // freeze instead of flickering
 
+#ifdef MQTT_SERVER
+WLED_GLOBAL bool mqttEnabled _INIT(true);
+#else
 WLED_GLOBAL bool mqttEnabled _INIT(false);
+#endif
 WLED_GLOBAL char mqttDeviceTopic[33] _INIT("");            // main MQTT topic (individual per device, default is wled/mac)
+#ifdef MQTT_GROUPTOPIC
+WLED_GLOBAL char mqttGroupTopic[33] _INIT(MQTT_GROUPTOPIC);     // second MQTT topic (for example to group devices)
+#else
 WLED_GLOBAL char mqttGroupTopic[33] _INIT("wled/all");     // second MQTT topic (for example to group devices)
+#endif
+#ifdef MQTT_SERVER
+WLED_GLOBAL char mqttServer[33] _INIT(MQTT_SERVER);                 // both domains and IPs should work (no SSL)
+#else
 WLED_GLOBAL char mqttServer[33] _INIT("");                 // both domains and IPs should work (no SSL)
+#endif
+#ifdef MQTT_USER
+WLED_GLOBAL char mqttUser[41] _INIT(MQTT_USER);                   // optional: username for MQTT auth
+#else
 WLED_GLOBAL char mqttUser[41] _INIT("");                   // optional: username for MQTT auth
+#endif
+#ifdef MQTT_PASS
+WLED_GLOBAL char mqttPass[65] _INIT(MQTT_PASS);                   // optional: password for MQTT auth
+#else
 WLED_GLOBAL char mqttPass[65] _INIT("");                   // optional: password for MQTT auth
+#endif
+#ifdef MQTT_CLIENTID
+WLED_GLOBAL char mqttClientID[41] _INIT(MQTT_CLIENTID);               // override the client ID
+#else
 WLED_GLOBAL char mqttClientID[41] _INIT("");               // override the client ID
+#endif
+#ifdef MQTT_PORT
+WLED_GLOBAL uint16_t mqttPort _INIT(MQTT_PORT);
+#else
 WLED_GLOBAL uint16_t mqttPort _INIT(1883);
+#endif
 
 #ifndef WLED_DISABLE_HUESYNC
 WLED_GLOBAL bool huePollingEnabled _INIT(false);           // poll hue bridge for light state
@@ -463,10 +504,26 @@ WLED_GLOBAL byte notificationSentCallMode _INIT(CALL_MODE_INIT);
 WLED_GLOBAL bool notificationTwoRequired _INIT(false);
 
 // effects
+#ifdef WLED_EFFECT_CURRENT
+WLED_GLOBAL byte effectCurrent _INIT(WLED_EFFECT_CURRENT);
+#else
 WLED_GLOBAL byte effectCurrent _INIT(0);
+#endif
+#ifdef WLED_EFFECT_SPEED
+WLED_GLOBAL byte effectSpeed _INIT(WLED_EFFECT_SPEED);
+#else
 WLED_GLOBAL byte effectSpeed _INIT(128);
+#endif
+#ifdef WLED_EFFECT_INTENSITY
+WLED_GLOBAL byte effectIntensity _INIT(WLED_EFFECT_INTENSITY);
+#else
 WLED_GLOBAL byte effectIntensity _INIT(128);
+#endif
+#ifdef WLED_EFFECT_PALETTE
+WLED_GLOBAL byte effectPalette _INIT(WLED_EFFECT_PALETTE);
+#else
 WLED_GLOBAL byte effectPalette _INIT(0);
+#endif
 WLED_GLOBAL bool effectChanged _INIT(false);
 
 // network
