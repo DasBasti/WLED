@@ -65,7 +65,7 @@ public:
             ret = mqtt->subscribe(subuf, 0);
             //DEBUG_PRINTF("sub: %s -> %u\n",subuf, ret);
         }
-        mqttInitialized = true;
+        mqttSubscribed = true;
     }
 
     void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total);
