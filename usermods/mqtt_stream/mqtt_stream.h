@@ -5,91 +5,82 @@
 #error "This user mod requires MQTT to be enabled."
 #endif
 
-class UsermodMqttStream: public Usermod
+class UsermodMqttStream : public Usermod
 {
 private:
-    bool mqttInitialized;
-    bool mqttSubscribed;
+  bool mqttSubscribed;
 
 public:
-    UsermodMqttStream() :
-            mqttInitialized(false),
-            mqttSubscribed(false)
-    {
-    }
+  UsermodMqttStream() : mqttSubscribed(false)
+  {
+  }
 
-    void setup()
-    {
-        
-    } 
+  void setup()
+  {
+  }
 
-    void connected()
+  void connected()
+  {
+  }
+
+  void onMqttConnect(bool sessionPresent)
+  {
+    mqttSubscribed = true;
+  }
+  void onMqttDisconnect(bool sessionPresent)
+  {
+    mqttSubscribed = false;
+  }
+
+  void loop()
+  {
+    if (mqtt && mqtt->connected() && !mqttSubscribed)
     {
+      char subuf[38];
+
+      if (mqttDeviceTopic[0] != 0)
+      {
+        strcpy(subuf, mqttDeviceTopic);
+        strcat_P(subuf, PSTR("/stream"));
+        mqtt->subscribe(subuf, 0);
+      }
+      if (mqttGroupTopic[0] != 0)
+      {
+        strcpy(subuf, mqttGroupTopic);
+        strcat_P(subuf, PSTR("/stream"));
+        mqtt->subscribe(subuf, 0);
+      }
       mqttSubscribed = false;
+
+      mqtt->onMessage(
+          std::bind(&UsermodMqttStream::onMqttMessage, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
+                    std::placeholders::_5, std::placeholders::_6));
     }
+  }
 
-    void loop()
-    {
-        if (!mqttInitialized) 
-        {
-          if (!mqtt)
-              return;
-          if (!mqtt->connected())
-              return;  
-          mqtt->onMessage(
-              std::bind(&UsermodMqttStream::onMqttMessage, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
-              std::placeholders::_5, std::placeholders::_6));
-          mqttInitialized = true;
-        }
-        if (!mqttSubscribed)
-        {
-            mqttSubscribe();
-            return; // Try again in next loop iteration
-        }
-    }
-
-    void mqttSubscribe()
-    {
-        char subuf[38];
-        
-        uint16_t ret=0;
-        if (mqttDeviceTopic[0] != 0) {
-            strcpy(subuf, mqttDeviceTopic);
-            strcat_P(subuf, PSTR("/stream"));
-            ret = mqtt->subscribe(subuf, 0);
-            //DEBUG_PRINTF("sub: %s -> %u\n",subuf, ret);
-        }
-        if (mqttGroupTopic[0] != 0) {
-            strcpy(subuf, mqttGroupTopic);
-            strcat_P(subuf, PSTR("/stream"));
-            ret = mqtt->subscribe(subuf, 0);
-            //DEBUG_PRINTF("sub: %s -> %u\n",subuf, ret);
-        }
-        mqttSubscribed = true;
-    }
-
-    void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total);
-
+  void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total);
 };
 
 inline void UsermodMqttStream::onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total)
-{// compare length of stream with led count
-    DEBUG_PRINTLN("mqtt message");
-    if (ledCount == len / 4) {
-      realtimeLock(realtimeTimeoutMs*5, REALTIME_MODE_GENERIC);
-      for(int i=0; i < len / 4; i++){
-        if (!arlsDisableGammaCorrection && strip.gammaCorrectCol)
-        {
-          strip.setPixelColor(i, 
-            strip.gamma8(payload[i*4]),
-            strip.gamma8(payload[(i*4)+1]),
-            strip.gamma8(payload[(i*4)+2]),
-            strip.gamma8(payload[(i*4)+3])
-          );
-        } else {
-          strip.setPixelColor(i, payload[i*4], payload[(i*4)+1], payload[(i*4)+2], payload[(i*4)+3]);
-        }
+{ // compare length of stream with led count
+  if (ledCount == len / 4)
+  {
+    realtimeLock(realtimeTimeoutMs * 5, REALTIME_MODE_GENERIC);
+    for (int i = 0; i < len / 4; i++)
+    {
+      if (!arlsDisableGammaCorrection && strip.gammaCorrectCol)
+      {
+        strip.setPixelColor(i,
+                            strip.gamma8(payload[i * 4]),
+                            strip.gamma8(payload[(i * 4) + 1]),
+                            strip.gamma8(payload[(i * 4) + 2]),
+                            strip.gamma8(payload[(i * 4) + 3]));
       }
-      strip.show();
+      else
+      {
+        strip.setPixelColor(i, payload[i * 4], payload[(i * 4) + 1], payload[(i * 4) + 2], payload[(i * 4) + 3]);
+      }
     }
+    strip.show();
+  }
 }
