@@ -11,7 +11,7 @@ private:
   bool mqttSubscribed;
 
 public:
-  UsermodMqttStream() : mqttSubscribed(false)
+  UsermodMqttStream() : mqttSubscribed(true)
   {
   }
 
@@ -25,16 +25,15 @@ public:
 
   void onMqttConnect(bool sessionPresent)
   {
-    mqttSubscribed = true;
-  }
-  void onMqttDisconnect(bool sessionPresent)
-  {
+    mqtt->onMessage(
+          std::bind(&UsermodMqttStream::onMqttMessage, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
+                    std::placeholders::_5, std::placeholders::_6));
     mqttSubscribed = false;
   }
 
   void loop()
   {
-    if (mqtt && mqtt->connected() && !mqttSubscribed)
+    if (!mqttSubscribed && mqtt && mqtt->connected())
     {
       char subuf[38];
 
@@ -50,11 +49,7 @@ public:
         strcat_P(subuf, PSTR("/stream"));
         mqtt->subscribe(subuf, 0);
       }
-      mqttSubscribed = false;
-
-      mqtt->onMessage(
-          std::bind(&UsermodMqttStream::onMqttMessage, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
-                    std::placeholders::_5, std::placeholders::_6));
+      mqttSubscribed = true;
     }
   }
 
