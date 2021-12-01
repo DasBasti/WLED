@@ -31,6 +31,10 @@
 #include "../usermods/buzzer/usermod_v2_buzzer.h"
 #endif
 
+#ifdef USERMOD_MQTT_BUZZER
+#include "../usermods/mqtt_buzzer/usermod_v2_mqtt_buzzer.h"
+#endif
+
 #ifdef USERMOD_SENSORSTOMQTT
 #include "../usermods/sensors_to_mqtt/usermod_v2_SensorsToMqtt.h"
 #endif
@@ -136,6 +140,10 @@ void registerUsermods()
 
   #ifdef USERMOD_BUZZER
   usermods.add(new BuzzerUsermod());
+  #endif
+
+  #ifdef USERMOD_MQTT_BUZZER
+  usermods.add(new MQTTBuzzerUsermod());
   #endif
 
   #ifdef USERMOD_BME280
