@@ -58,7 +58,7 @@ public:
 
 inline void UsermodMqttStream::onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total)
 { // compare length of stream with led count
-  if (ledCount == len / 4)
+  if (strip.getLengthTotal() == len / 4)
   {
     realtimeLock(realtimeTimeoutMs * 5, REALTIME_MODE_GENERIC);
     for (int i = 0; i < len / 4; i++)
