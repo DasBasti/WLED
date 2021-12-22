@@ -113,6 +113,10 @@
 #include "../usermods/websocket/usermod_websocket.h"
 #endif
 
+#ifdef QUINLED_AN_PENTA
+#include "../usermods/quinled-an-penta/quinled-an-penta.h"
+#endif
+
 void registerUsermods()
 {
 /*
@@ -211,5 +215,9 @@ void registerUsermods()
 
   #ifdef USERMOD_MQTTSTREAM
   usermods.add(new UsermodMqttStream());
+  #endif
+  
+  #ifdef QUINLED_AN_PENTA
+  usermods.add(new QuinLEDAnPentaUsermod());
   #endif
 }
